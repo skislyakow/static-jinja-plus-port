@@ -11,7 +11,7 @@ Docker-порт [StaticJinjaPlus](https://github.com/MrDave/StaticJinjaPlus) —
 
 ## Требования
 
-- Docker (не ниже 20.10 — нужен BuildKit / `ADD --checksum`)
+- Docker (не ниже 20.10 — нужен BuildKit)
 - (опционально) учётная запись на [Docker Hub](https://hub.docker.com) для публикации образов
 
 ## Сборка образов
@@ -32,13 +32,13 @@ docker build -f Dockerfile.slim -t kislyakow/static-jinja-plus:slim .
 
 ## Выбор версии StaticJinjaPlus
 
-Версия задаётся аргументом сборки `SJP_VERSION` (имя тега в репозитории автора), а целостность архива проверяется хешем `SJP_SHA256`.
+Источник кода задаётся аргументом сборки `SJP_REF` (полный ref в репозитории автора: `refs/tags/...` для версии или `refs/heads/...` для ветки), а целостность архива проверяется хешем `SJP_SHA256` (значение `none` отключает проверку).
 
 Собирать можно любую версию, существующую как тег в https://github.com/MrDave/StaticJinjaPlus:
 
 ```bash
 docker build \
-  --build-arg SJP_VERSION=0.1.0 \
+  --build-arg SJP_REF=refs/tags/0.1.0 \
   --build-arg SJP_SHA256=3555bcfd670e134e8360ad934cb5bad1bbe2a7dad24ba7cafa0a3bb8b23c6444 \
   -t kislyakow/static-jinja-plus:0.1.0 .
 ```
@@ -47,7 +47,7 @@ docker build \
 
 ```bash
 docker build -f Dockerfile.slim \
-  --build-arg SJP_VERSION=0.1.0 \
+  --build-arg SJP_REF=refs/tags/0.1.0 \
   --build-arg SJP_SHA256=3555bcfd670e134e8360ad934cb5bad1bbe2a7dad24ba7cafa0a3bb8b23c6444 \
   -t kislyakow/static-jinja-plus:0.1.0-slim .
 ```
@@ -56,8 +56,8 @@ docker build -f Dockerfile.slim \
 
 | Аргумент | Назначение | Значение по умолчанию |
 |---|---|---|
-| `SJP_VERSION` | Тег релиза StaticJinjaPlus | `0.1.1` |
-| `SJP_SHA256` | SHA-256 архива этой версии (нижний регистр) | хеш архива `0.1.1` |
+| `SJP_REF` | Полный ref в репозитории автора | `refs/tags/0.1.1` |
+| `SJP_SHA256` | SHA-256 архива этого ref (нижний регистр); `none` — без проверки | хеш архива `0.1.1` |
 
 ### Как посчитать SHA256 для новой версии
 
@@ -66,17 +66,17 @@ curl -L -o sjp.tar.gz https://codeload.github.com/MrDave/StaticJinjaPlus/tar.gz/
 sha256sum sjp.tar.gz
 ```
 
-> Проверка хеша теряет смысл, если `SJP_SHA256` не соответствует выбранной `SJP_VERSION`: сборка упадёт. Хеш менять не нужно только когда собираете ту версию, для которой он уже актуален.
+> Проверка хеша теряет смысл, если `SJP_SHA256` не соответствует выбранному `SJP_REF`: сборка упадёт. Хеш менять не нужно только когда собираете тот ref, для которого он уже актуален.
 
 ### Сборка из ветки (продвинутый вариант)
 
 Чтобы собрать незарелиженную версию из основной ветки `main` (например, для проверки свежего фикса бага):
 
 ```bash
-docker build --build-arg SJP_VERSION=refs/heads/main --build-arg SJP_SHA256=sha256:none -t kislyakow/static-jinja-plus:develop .
+docker build --build-arg SJP_REF=refs/heads/main --build-arg SJP_SHA256=none -t kislyakow/static-jinja-plus:develop .
 ```
 
-Здесь `SJP_SHA256=sha256:none` отключает проверку — у ветки нет стабильного хеша.
+Здесь `SJP_SHA256=none` отключает проверку — у ветки нет стабильного хеша.
 
 ## Запуск образа
 
@@ -127,7 +127,7 @@ Slim-образ заметно меньше и обычно достаточен
 ## Как устроен Dockerfile
 
 1. Образ строится на зафиксированной версии базового образа (`ubuntu:26.04` / `python:3.14-slim`).
-2. Архив исходников скачивается через `ADD --checksum=sha256:...` — без `git clone`, для конкретного тега.
+2. Архив исходников скачивается через `ADD` — без `git clone`, по указанному ref (`refs/tags/...` или `refs/heads/...`). Целостность проверяется `sha256sum -c`; `SJP_SHA256=none` пропускает проверку (нужно для веток).
 3. Распаковывается в `/opt/StaticJinjaPlus` (`tar --strip-components=1`).
 4. Для ubuntu зависимости ставятся в виртуальное окружение `/opt/venv` (системный pip заблокирован политикой PEP 668); для python-slim — напрямую системным pip.
 5. Кэш apt и распакованный архив удаляются, чтобы не раздувать образ.
