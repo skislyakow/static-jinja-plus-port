@@ -1,6 +1,12 @@
 # static-jinja-plus-port
 
-Docker-порт [StaticJinjaPlus](https://github.com/MrDave/StaticJinjaPlus) — набора инструментов для генерации статических HTML-сайтов из Jinja2-шаблонов.
+[![Docker Pulls](https://img.shields.io/docker/pulls/kislyakow/static-jinja-plus?logo=docker&label=pulls)](https://hub.docker.com/r/kislyakow/static-jinja-plus)
+[![Ubuntu image](https://img.shields.io/docker/image-size/kislyakow/static-jinja-plus/latest?logo=docker&label=ubuntu%20image)](https://hub.docker.com/r/kislyakow/static-jinja-plus/tags)
+[![StaticJinjaPlus](https://img.shields.io/badge/StaticJinjaPlus-0.1.1-orange)](https://github.com/MrDave/StaticJinjaPlus/tags)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/skislyakow/static-jinja-plus-port?logo=github)](https://github.com/skislyakow/static-jinja-plus-port/commits/main)
+
+Docker-порт [StaticJinjaPlus](https://github.com/MrDave/StaticJinjaPlus) — набора инструментов для генерации статических HTML-сайтов из Jinja2-шаблонов. Готовые образы публикуются на [Docker Hub](https://hub.docker.com/r/kislyakow/static-jinja-plus).
 
 Этот репозиторий содержит только инструменты для сборки Docker-образов:
 
@@ -131,3 +137,7 @@ Slim-образ заметно меньше и обычно достаточен
 3. Распаковывается в `/opt/StaticJinjaPlus` (`tar --strip-components=1`).
 4. Для ubuntu зависимости ставятся в виртуальное окружение `/opt/venv` (системный pip заблокирован политикой PEP 668); для python-slim — напрямую системным pip.
 5. Кэш apt и распакованный архив удаляются, чтобы не раздувать образ.
+
+## Лицензия
+
+Проект распространяется по [MIT-лицензии](LICENSE). Исходный код StaticJinjaPlus — © 2024 David Schnoll, [также под MIT](https://github.com/MrDave/StaticJinjaPlus/blob/main/LICENSE). Файлы порта (Dockerfile-ы и документация) — © 2026 skislyakow.
